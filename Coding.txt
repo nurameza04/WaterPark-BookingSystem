@@ -1,0 +1,622 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#define maxsize 20
+
+struct Category
+{
+    int Adult;
+    int Child;
+    int SeniorCitizen;
+}cd[maxsize];
+
+struct Customer
+{
+    char name[100];
+    int custID;
+    int membership;
+
+    struct Category cd;
+}cust[maxsize];
+
+struct addOn
+{
+    char Package;
+    int price;
+}add[maxsize];
+
+struct Booking
+{
+    struct Customer cust;
+
+    int bDate; //booking date
+    int AddOnOption;
+    int fee;
+};
+
+struct Report
+{
+    char rDate[30];
+    int totalPayment;
+
+    struct Booking bookDet;
+}repDet[maxsize];
+
+int addBooking(struct Report repDet[],struct Customer cust[],struct addOn add[]);
+void deleteCustName(struct Customer cust[]);
+void deleteCustID(struct Customer cust[]);
+void deleteInfo(int i);
+void updateBooking(struct Report repDet[], struct Customer cust[],struct addOn add[]);
+void sortBooking(struct Customer cust[],struct Report repDet[]);
+void searchBooking(struct Report repDet[], struct Customer cust[]);
+void generateReport(struct Report repDet[], struct Customer cust[],struct addOn add[]);
+
+int count = -1;
+
+void main()
+{
+    int ch,select;
+
+    details:
+    do
+    {
+        printf("\n\n[---------------WATER PARK BOOKING REPORT--------------]");
+        printf("\n1-ADD CUSTOMER BOOKING INFO");
+        printf("\n2-DELETE CUSTOMER BOOKING INFO");
+        printf("\n3-UPDATE CUSTOMER BOOKING INFO");
+        printf("\n4-SORT CUSTOMER BOOKING INFO");
+        printf("\n5-SEARCH CUSTOMER BOOKING INFO");
+        printf("\n6-CUSTOMER BOOKING DETAILS");
+        printf("\n7-EXIT");
+        printf("\n\nENTER CHOICE: ");
+        scanf("%d",&ch);
+
+        switch (ch)
+        {
+            case 1:
+                addBooking(repDet,cust,add);
+                break;
+
+            case 2:
+                deleteBooking:
+                    printf("\nPlease select: ");
+                    printf("\n1-Delete by customer name");
+                    printf("\n2-Delete by customer ID");
+                    printf("\n3-Back to main menu");
+                    printf("\n\nEnter your selection: ");
+                    scanf("%d", &select);
+
+                    if(select==1)
+                    {
+                        deleteCustName(cust);
+                    }
+                    else if(select==2)
+                    {
+                        deleteCustID(cust);
+                    }
+                    else
+                    {
+                        goto deleteBooking;
+                    }
+                break;
+
+            case 3:
+                updateBooking(repDet,cust,add);
+                break;
+
+            case 4:
+                sortBooking(cust,repDet);
+                break;
+
+            case 5:
+                searchBooking(repDet,cust);
+                break;
+
+            case 6:
+                generateReport(repDet,cust,add);
+                break;
+
+            case 7:
+                printf("\nEXIT MENU");
+                break;
+
+            default:
+                printf("\nINVALID ENTRY. PLEASE SELECT 1/2/3/4/5/6/7 ONLY\n");
+                goto details;
+        }
+    }while (ch!=7);
+}
+
+int addBooking(struct Report repDet[],struct Customer cust[],struct addOn add[])
+{
+    int list;
+    int totalPayment;
+
+    if(count==maxsize)
+    {
+        printf("\n\n**Sorry,cannot add into the list. List is FULL.**\n\n");
+    }
+    else
+    {
+        do
+        {
+           if(list==1)
+            {
+                count++;
+                repDet[count]=repDet[count-1];
+                cust[count]=cust[count-1];
+                cd[count]=cd[count-1];
+
+                printf("\n---------------Customer Details---------------");
+                printf("\n\nBooking Date [ddmmyy]\t: ");
+                scanf("%d",&repDet[count].bookDet.bDate);
+                printf("Enter Name\t: ");
+                scanf("%s",&cust[count].name);
+                printf("Enter ID [xxxx]\t: ");
+                scanf("%d",&cust[count].custID);
+                printf("\nEnter Customer Booking Quantity: ");
+                printf("\n---------------------------------");
+                printf("\nAdult         : ");
+                scanf("%d",&cd[count].Adult);
+                printf("Child         : ");
+                scanf("%d",&cd[count].Child);
+                printf("Senior Citizen: ");
+                scanf("%d",&cd[count].SeniorCitizen);
+                printf("\n---------------------------------");
+
+                printf("\nEnter Membership[YES=1 | NO=0]: ");
+                scanf("%d",&cust[count].membership);
+
+                if(cust[count].membership==1)
+                {
+                    repDet[count].bookDet.fee = cd[count].Adult*23 + (cd[count].Child + cd[count].SeniorCitizen)*15;
+                }
+                else
+                {
+                    repDet[count].bookDet.fee = cd[count].Adult*26 + cd[count].Child*18 +  cd[count].SeniorCitizen*18;
+                }
+
+                printf("\nRequest Add-On? [YES=1 | NO=0]: ");
+                scanf("%d",&repDet[count].bookDet.AddOnOption);
+
+                if(repDet[count].bookDet.AddOnOption==1)
+                {
+                    printf("\n[-------------------------------------ADD ON MENU---------------------------------------------]\n");
+                    printf("|=========|===================================================================================|\n");
+                    printf("| Package | Facilities                                                                        |\n");
+                    printf("|=========|===================================================================================|\n");
+                    printf("|    A    | Single tube,Locker medium,Cabana                                                  |\n");
+                    printf("|    B    | Single tube,Double tube,Locker large,Cabana                                       |\n");
+                    printf("|    C    | Single tube,Double tube,Locker large,Cabana,Beach volleyball                      |\n");
+                    printf("|    D    | Double tube,Locker large,Children Life Vest,Cabana                                |\n");
+                    printf("|    E    | Single tube,Double tube,Locker large,Children Life Vest,Beach volleyball,Cabana   |\n");
+                    printf("|=========|===================================================================================|\n");
+
+                    package:
+                    printf("Enter Package: ");
+                    scanf("%s",&add[count].Package);
+
+                    switch(add[count].Package)
+                    {
+                        case 'A': add[count].price = 70;
+                        break;
+                        case 'B': add[count].price = 90;
+                        break;
+                        case 'C': add[count].price = 100;
+                        break;
+                        case 'D': add[count].price = 115;
+                        break;
+                        case 'E': add[count].price = 135;
+                        break;
+                        default:printf("\nINVALID ENTRY. PLEASE SELECT 'A','B','C','D','E'\n");
+                        goto package;
+                    }
+                }
+                else
+                {
+                    add[count].price=0;
+                }
+        }
+        repDet[count].totalPayment = repDet[count].bookDet.fee + add[count].price;
+
+        printf("\n******---------------******\n");
+        printf("Add booking? [YES=1 | NO=0]: ");
+        scanf("%d",&list);
+
+        }while(list!=0);
+    }
+
+    return totalPayment;
+}
+
+void deleteCustName(struct Customer cust[])
+{
+   char name_del[100];
+   int confirm;
+
+   printf("\n-----DELETE CUSTOMER NAME-----\n");
+   printf("\nEnter Name to be Deleted: ");
+   scanf("%s",&name_del);
+
+   for(int i=0;i<=maxsize;i++)
+   {
+       if(strcmp(name_del,cust[i].name)==0)
+       {
+           printf("\nCustomer name is %s", cust[i].name);
+           printf("\nCustomer ID is %d", cust[i].custID);
+           printf("\nDelete booking? [Yes=1/No=0]:");
+           scanf("%d", &confirm);
+
+           if(confirm==1)
+            {
+             deleteInfo(i);
+            }
+           else
+            {
+                printf("\n***Your request is CANCELED***\n");
+            }
+
+            return;
+       }
+
+   }
+   printf("\n***Name NOT FOUND***\n");
+   return;
+}
+
+void deleteCustID(struct Customer cust[])
+{
+  int id_del;
+  int confirm;
+
+  printf("\n-----DELETE CUSTOMER ID-----\n");
+  printf("\nEnter ID to be Deleted[xxxx]: ");
+  scanf("%d",&id_del);
+
+  for(int i=0;i<=maxsize;i++)
+  {
+      if(strcmp(id_del,cust[i].custID)==0)
+      {
+          printf("\nCustomer ID is %d", cust[i].custID);
+          printf("\nCustomer name is %s", cust[i].name);
+          printf("\nDelete booking? [Yes=1/No=0]:");
+          scanf("%d", &confirm);
+          if(confirm==1)
+            {
+                 deleteInfo(i);
+            }
+            else
+             {
+               printf("\n***Your request is CANCELED***\n");
+             }
+             return;
+
+      }
+
+  }
+  printf("\n***ID NOT FOUND***\n");
+  return;
+}
+
+
+void deleteInfo(int i)
+{
+ for(int j=i; j<maxsize;j++)
+ {
+     cust[j]=cust[j+1];
+ }
+ count--;
+ printf("\n-----DELETE SUCCESSFUL-----\n");
+}
+
+void updateBooking(struct Report repDet[], struct Customer cust[],struct addOn add[])
+{
+    int id_upd;
+    int k, confirm, choose[3];
+
+        printf("\nEnter the customer ID to be updated[xxxx]: ");
+        scanf("%d",&id_upd);
+
+        for (int i=0; i<=maxsize; i++)
+        {
+            printf("\nCustomer name is %s", cust[i].name);
+            printf("\nCustomer ID is %d", cust[i].custID);
+            printf("\nUpdate details? [Yes=1/No=0]:");
+            scanf("%d", &confirm);
+
+            do
+            {
+                if(confirm==1)
+                {
+                    update_cust:
+                    printf("\n\nSelect the data you want to update: ");
+                    printf("\n1-Customer Booking Date");
+                    printf("\n2-Customer Booking Quantity");
+                    printf("\n3-Customer Add-On Package");
+                    printf("\n4-Display Updated Customer Details");
+                    printf("\n5-Back to Main Menu");
+                    printf("\n\nEnter your selection: ");
+                    scanf("%d", &choose[i]);
+
+                            if(choose[i]==1)
+                            {
+                                printf("\nCustomer booking date[ddmmyy]: ");
+                                scanf("%d", &repDet[i].bookDet.bDate);
+                            }
+                            else if(choose[i]==2)
+                            {
+                                printf("\nCustomer booking quantity with category :");
+                                printf("\nAdult: ");
+                                scanf("%d",&cd[i].Adult);
+                                printf("Child: ");
+                                scanf("%d",&cd[i].Child);
+                                printf("Senior Citizen: ");
+                                scanf("%d",&cd[i].SeniorCitizen);
+                            }
+                            else if(choose[i]==3)
+                            {
+                                printf("\nCustomer Add-On Package: ");
+                                scanf("%s",&add[i].Package);
+                            }
+                            else if(choose[i]==4)
+                            {
+                                printf("\nUPDATED SUCCESSFULL\n");
+                                printf("\n----------------Updated Customer Details----------------");
+                                printf("\nCustomer name: %s", cust[i].name);
+                                printf("\nCustomer ID: %d", cust[i].custID);
+                                printf("\nCustomer booking date: %d", repDet[i].bookDet.bDate);
+                                printf("\nCustomer booking quantity with category :");
+                                printf("\nAdult: %d", cd[i].Adult);
+                                printf("\nChild: %d", cd[i].Child);
+                                printf("\nSenior Citizen: %d", cd[i].SeniorCitizen);
+                            }
+                            else if(choose[i]==5)
+                            {
+                                printf("\n***Updated CANCEL***\n");
+                                return;
+                            }
+                            else
+                            {
+                                printf("\nINVALID ENTRY. PLEASE SELECT 1/2/3/4/5 ONLY\n");
+                                goto update_cust;
+                            }
+                        }
+
+                else
+                {
+                   printf("\n***Your request is CANCELED***\n");
+                   return;
+                }
+                }while(confirm!=0);
+
+
+        }
+        printf("\n**RECORD NOT FOUND**\n");
+}
+
+void sortBooking(struct Customer cust[],struct Report repDet[])
+{
+  int smallest;
+  int a, b;
+  int temp;
+  int category;
+  int i;
+
+  printf("Enter Sorting Category [1:Customer ID | 2:Booking Date | 3:Total Payment]: ");
+  scanf("%d", &category);
+
+
+  if (category == 1)
+    {
+      for (a = 0; a < count-1; a++)
+	{
+	  smallest = a;
+
+	  for (b = a + 1; b < count; b++)
+	    {
+	      if (cust[smallest].custID>cust[b].custID)
+		{
+		  smallest = b;
+		}
+	    }
+      if(smallest!=a)
+        {
+           temp =cust[a].custID;
+           cust[a].custID = cust[smallest].custID;
+           cust[smallest].custID = temp;
+        }
+	    }
+    for(i=0;i<=count;i++)
+    {
+        printf("\n====================================================\n");
+        printf("\nCustomer ID  \t: %d",cust[i].custID);
+        printf("\nCustomer Name\t: %s",cust[i].name);
+    }
+    }
+
+  else if(category==2)
+    {
+     for (a = 0; a < count-1; a++)
+	{
+	  smallest = a;
+
+	  for (b = a + 1; b < count; b++)
+	    {
+	      if (repDet[smallest].bookDet.bDate>repDet[b].bookDet.bDate)
+		{
+		  smallest = b;
+		}
+	    }
+      if(smallest!=a)
+        {
+           temp =repDet[a].bookDet.bDate;
+           repDet[a].bookDet.bDate = repDet[smallest].bookDet.bDate;
+           repDet[smallest].bookDet.bDate = temp;
+        }
+    }
+
+    for(i=0;i<=count;i++)
+    {
+        printf("\n====================================================\n");
+        printf("\n| Booking Date[ddmmyy] : %d |\n",repDet[i].bookDet.bDate);
+        printf("\n| Customer Name        : %s |\n",cust[i].name);
+    }
+    }
+
+     else
+    {
+     for (a = 0; a < count-1; a++)
+	{
+	  smallest = a;
+
+	  for (b = a + 1; b < count; b++)
+	    {
+	      if (repDet[smallest].totalPayment>repDet[b].totalPayment)
+		{
+		  smallest = b;
+		}
+	    }
+      if(smallest!=a)
+        {
+           temp =repDet[a].totalPayment;
+           repDet[a].totalPayment = repDet[smallest].totalPayment;
+           repDet[smallest].totalPayment = temp;
+        }
+    }
+
+    for(i=0;i<=count;i++)
+    {
+        printf("\n====================================================\n");
+        printf("\n| Total Payment   : RM%d |\n",repDet[i].totalPayment);
+        printf("\n| Customer Name   : %s   |\n",cust[i].name);
+    }
+    }
+}
+
+void searchBooking(struct Report repDet[], struct Customer cust[])
+{
+    int search;
+    int searchCustID,searchDate;
+    char searchName[100];
+
+    printf("Search for?[1:Customer ID  | 2:Booking Date | 3:Customer Name]: ");
+    scanf("%d",&search);
+
+    for(int i=0;i<=maxsize;i++)
+    {
+            if(search==1)
+            {
+                printf("\nEnter customer ID to search[xxxx]: ");
+                scanf("%d",&searchCustID);
+
+                printf("\nCustomer name: %s", cust[i].name);
+                printf("\nCustomer ID: %d\n", cust[i].custID);
+
+            }
+            else if(search==2)
+            {
+                printf("\nEnter booking date to search: ");
+                scanf("%d",&searchDate);
+
+                printf("\nCustomer name: %s", cust[i].name);
+                printf("\nCustomer booking date: %d\n", repDet[i].bookDet.bDate);
+            }
+            else
+            {
+                printf("\nEnter Name to search: ");
+                scanf("%s",&searchName);
+
+                printf("\n|==================Customer Details============================|\n");
+                printf("\nCustomer Name: %s",cust[i].name);
+                printf("\nCustomer ID  : %d",cust[i].custID);
+                printf("\nCustomer booking date: %d",repDet[i].bookDet.bDate);
+                printf("\nCustomer Booking Quantity:");
+                printf("\nAdult          :%d",cd[i].Adult);
+                printf("\nChild          :%d",cd[i].Child);
+                printf("\nSenior Citizen :%d",cd[i].SeniorCitizen);
+                printf("\nMembership Status[YES=1 | NO=0]: %d",cust[i].membership);
+                printf("\nRequest Add-On? [YES=1 | NO=0]: %d",repDet[i].bookDet.AddOnOption);
+                printf("\nAdd-On Package: %c",add[i].Package);
+                printf("\nTotal Price: %d",repDet[i].totalPayment);
+
+            }
+            return;
+    }
+    printf("\nSorry the data searched is not in the system\n");
+}
+
+void generateReport(struct Report repDet[], struct Customer cust[],struct addOn add[])
+{
+    int disp,top=0;
+
+    printf("\nWhat do you want to display?");
+    printf("\n1. Customers' Booking Date");
+    printf("\n2. Customers' AddOn");
+    printf("\n3. Customers' Details");
+
+    printf("\nDisplay: ");
+    scanf("%d",&disp);
+
+    if (disp==1)
+    {
+        if(count==-1)
+        {
+            printf("\n**The list is EMPTY.**\n");
+        }
+        else
+        {
+            printf("\n[---------------------CUSTOMER BOOKING DATE--------------------------]\n");
+            printf("|==============================================|\n");
+            printf("| Customer Name\tCustomer ID\tBooking Date |\n");
+
+            for (int c=count;c>=0;c--)
+            {
+               top++;
+               printf("|%s\t\t%d\t\t%d\n",cust[c].name,cust[c].custID,repDet[c].bookDet.bDate);
+            }
+             printf("|==============================================|\n");
+        }
+    }
+
+    else if (disp==2)
+    {
+        if(count==-1)
+        {
+            printf("\n**The list is EMPTY.**\n");
+        }
+        else
+        {
+            printf("\n[---------------------CUSTOMER ADD-ON--------------------------]\n");
+            printf("|==============================================|\n");
+            printf("| Customer Name\tCustomer ID\tAdd On Package\tPrice |\n");
+
+            for (int c=count;c>=0;c--)
+            {
+               top++;
+               printf("|%s\t\t%d\t\t%c\t\tRM%d\n",cust[c].name,cust[c].custID,add[c].Package,add[c].price);
+            }
+             printf("|==============================================|\n");
+        }
+    }
+
+    else
+    {
+      if(count==-1)
+      {
+          printf("\n**The list is EMPTY.**\n");
+      }
+      else
+      {
+          printf("\n[---------------------CUSTOMER DETAILS--------------------------]\n");
+          printf("|=============================================================================================|\n");
+          printf("| Customer Name\tCustomer ID\tBooking Date\tAdult\tChild\tSenior Citizen\tTotal Payment |\n");
+
+          for (int c=count;c>=0;c--)
+          {
+            top++;
+            printf("| %s\t\t%d\t\t%d\t\t%d\t%d\t%d\t\tRM%d\n",cust[c].name,cust[c].custID,repDet[c].bookDet.bDate,cd[c].Adult,cd[c].Child,cd[c].SeniorCitizen,repDet[c].totalPayment);
+          }
+          printf("|=============================================================================================|\n");
+      }
+    }
+ }
